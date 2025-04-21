@@ -180,4 +180,47 @@ class RentalPropertyDatabaseServiceTest {
         }
     }
 
+    @Test
+    void shouldAddRentalProperty() throws Exception {
+        try (MockedStatic<DriverManager> mockedDriverManager = mockStatic(DriverManager.class)) {
+            Connection mockConnection = mock(Connection.class);
+            PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
+
+            mockedDriverManager.when(() -> DriverManager.getConnection(anyString(), anyString(), anyString()))
+                    .thenReturn(mockConnection);
+            when(mockConnection.prepareStatement("INSERT INTO rental_properties (reference_id, description, town, address, property_type, rent_amount, " +
+                                                 "security_deposit_amount, area, bedrooms_count, floor_number, number_of_floors, construction_year, " +
+                                                 "energy_classification, has_elevator, has_intercom, has_balcony, has_parking_space) " +
+                                                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"))
+                    .thenReturn(mockPreparedStatement);
+
+            RentalProperty rentalProperty = new RentalProperty(
+                    1, "Test Description", "Test Town", "Test Address", PropertyType.FLAT, 1000.0, 2000.0, 50.0, 2, 1, 3, 2000,
+                    EnergyClassification.D, true, false, true, false
+            );
+
+            rentalPropertyDatabaseService.addRentalProperty(rentalProperty);
+
+            verify(mockPreparedStatement).setInt(1, rentalProperty.referenceId());
+            verify(mockPreparedStatement).setString(2, rentalProperty.description());
+            verify(mockPreparedStatement).setString(3, rentalProperty.town());
+            verify(mockPreparedStatement).setString(4, rentalProperty.address());
+            verify(mockPreparedStatement).setString(5, rentalProperty.propertyType().getDesignation());
+            verify(mockPreparedStatement).setDouble(6, rentalProperty.rentAmount());
+            verify(mockPreparedStatement).setDouble(7, rentalProperty.securityDepositAmount());
+            verify(mockPreparedStatement).setDouble(8, rentalProperty.area());
+            verify(mockPreparedStatement).setInt(9, rentalProperty.bedroomsCount());
+            verify(mockPreparedStatement).setInt(10, rentalProperty.floorNumber());
+            verify(mockPreparedStatement).setInt(11, rentalProperty.numberOfFloors());
+            verify(mockPreparedStatement).setInt(12, rentalProperty.constructionYear());
+            verify(mockPreparedStatement).setString(13, rentalProperty.energyClassification().name());
+            verify(mockPreparedStatement).setBoolean(14, rentalProperty.hasElevator());
+            verify(mockPreparedStatement).setBoolean(15, rentalProperty.hasIntercom());
+            verify(mockPreparedStatement).setBoolean(16, rentalProperty.hasBalcony());
+            verify(mockPreparedStatement).setBoolean(17, rentalProperty.hasParkingSpace());
+
+            verify(mockPreparedStatement).executeUpdate();
+            //verifyNoMoreInteractions(mockPreparedStatement);
+        }
+    }
 }
