@@ -96,9 +96,9 @@ public class RentalPropertyDatabaseService {
                 preparedStatement.executeUpdate();
             }
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("MySQL JDBC Driver not found", e);
+            throw new MySQLDriverNotFoundException("MySQL JDBC Driver not found", e);
         } catch (SQLException e) {
-            throw new RuntimeException("Error adding rental property to database", e);
+            throw new RentalPropertyDatabaseException("Error adding rental property to database", e);
         }
     }
 
