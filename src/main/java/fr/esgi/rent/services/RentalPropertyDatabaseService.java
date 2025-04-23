@@ -58,9 +58,9 @@ public class RentalPropertyDatabaseService {
                 return Optional.empty();
             }
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("MySQL JDBC Driver not found", e);
+            throw new MySQLDriverNotFoundException("MySQL JDBC Driver not found", e);
         } catch (SQLException e) {
-            throw new RuntimeException("Error fetching rental property by ID from database", e);
+            throw new RentalPropertyDatabaseException("Error fetching rental property by ID from database", e);
         }
     }
 
