@@ -3,8 +3,23 @@ version: '3.9'
 services:
   payara:
     image: payara/server-full:latest
-    container_name: payara
+    container_name: rent-data-solutions
     ports:
       - "8080:8080"
     volumes:
-      - ./target/rent-data-1.0-SNAPSHOT.war:/opt/payara/deployments/rent-data.war
+      - ./target/rent-data-solutions-1.0-SNAPSHOT.war:/opt/payara/deployments/rent-data.war
+    environment:
+      - DB_URL=jdbc:mysql://rent-datastore:3306/rental_property_db?useSSL=false&allowPublicKeyRetrieval=true
+      - DB_USER=root
+      - DB_PASSWORD=password
+    depends_on:
+      - rent-datastore
+
+  rent-datastore:
+    image: mysql:8.0
+    container_name: rent-datastore
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: rental_property_db
