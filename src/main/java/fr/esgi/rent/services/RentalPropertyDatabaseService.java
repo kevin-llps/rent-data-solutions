@@ -3,6 +3,8 @@ package fr.esgi.rent.services;
 import fr.esgi.rent.beans.EnergyClassification;
 import fr.esgi.rent.beans.PropertyType;
 import fr.esgi.rent.beans.RentalProperty;
+import fr.esgi.rent.exception.MySQLDriverNotFoundException;
+import fr.esgi.rent.exception.RentalPropertyDatabaseException;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.sql.*;
@@ -32,9 +34,9 @@ public class RentalPropertyDatabaseService {
                 }
             }
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("MySQL JDBC Driver not found", e);
+            throw new MySQLDriverNotFoundException("MySQL JDBC Driver not found", e);
         } catch (SQLException e) {
-            throw new RuntimeException("Error fetching rental properties from database", e);
+            throw new RentalPropertyDatabaseException("Error fetching rental properties from database", e);
         }
 
         return rentalProperties;
