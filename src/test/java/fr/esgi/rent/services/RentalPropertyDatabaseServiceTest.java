@@ -7,11 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -85,6 +83,100 @@ class RentalPropertyDatabaseServiceTest {
             verify(mockStatement).close();
 
             verifyNoMoreInteractions(mockConnection, mockStatement);
+        }
+    }
+
+    @Test
+    void shouldGetRentalPropertyById() throws Exception {
+        try (MockedStatic<DriverManager> mockedDriverManager = mockStatic(DriverManager.class)) {
+            Connection mockConnection = mock(Connection.class);
+            PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
+            ResultSet mockResultSet = mock(ResultSet.class);
+
+            mockedDriverManager.when(() -> DriverManager.getConnection(any(), any(), any()))
+                    .thenReturn(mockConnection);
+            when(mockConnection.prepareStatement("SELECT * FROM rental_property WHERE reference_id = ?"))
+                    .thenReturn(mockPreparedStatement);
+            when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
+
+            when(mockResultSet.next()).thenReturn(true);
+            when(mockResultSet.getInt("reference_id")).thenReturn(1);
+            when(mockResultSet.getString("description")).thenReturn("Test Description");
+            when(mockResultSet.getString("town")).thenReturn("Test Town");
+            when(mockResultSet.getString("address")).thenReturn("Test Address");
+            when(mockResultSet.getString("property_type")).thenReturn(PropertyType.FLAT.getDesignation());
+            when(mockResultSet.getDouble("rent_amount")).thenReturn(1000.0);
+            when(mockResultSet.getDouble("security_deposit_amount")).thenReturn(2000.0);
+            when(mockResultSet.getDouble("area")).thenReturn(50.0);
+            when(mockResultSet.getInt("bedrooms_count")).thenReturn(2);
+            when(mockResultSet.getInt("floor_number")).thenReturn(1);
+            when(mockResultSet.getInt("number_of_floors")).thenReturn(3);
+            when(mockResultSet.getInt("construction_year")).thenReturn(2000);
+            when(mockResultSet.getString("energy_classification")).thenReturn("D");
+            when(mockResultSet.getBoolean("has_elevator")).thenReturn(true);
+            when(mockResultSet.getBoolean("has_intercom")).thenReturn(false);
+            when(mockResultSet.getBoolean("has_balcony")).thenReturn(true);
+            when(mockResultSet.getBoolean("has_parking_space")).thenReturn(false);
+
+            Optional<RentalProperty> actual = rentalPropertyDatabaseService.getRentalPropertyById(1);
+
+            assertThat(actual).isPresent();
+
+            RentalProperty rentalProperty = actual.get();
+            assertThat(rentalProperty.referenceId()).isEqualTo(1);
+            assertThat(rentalProperty.description()).isEqualTo("Test Description");
+            assertThat(rentalProperty.town()).isEqualTo("Test Town");
+            assertThat(rentalProperty.address()).isEqualTo("Test Address");
+            assertThat(rentalProperty.propertyType()).isEqualTo(PropertyType.FLAT);
+            assertThat(rentalProperty.rentAmount()).isEqualTo(1000.0);
+            assertThat(rentalProperty.securityDepositAmount()).isEqualTo(2000.0);
+            assertThat(rentalProperty.area()).isEqualTo(50.0);
+            assertThat(rentalProperty.bedroomsCount()).isEqualTo(2);
+            assertThat(rentalProperty.floorNumber()).isEqualTo(1);
+            assertThat(rentalProperty.numberOfFloors()).isEqualTo(3);
+            assertThat(rentalProperty.constructionYear()).isEqualTo(2000);
+            assertThat(rentalProperty.energyClassification()).isEqualTo(EnergyClassification.D);
+            assertThat(rentalProperty.hasElevator()).isTrue();
+            assertThat(rentalProperty.hasIntercom()).isFalse();
+            assertThat(rentalProperty.hasBalcony()).isTrue();
+            assertThat(rentalProperty.hasParkingSpace()).isFalse();
+
+            verify(mockConnection).prepareStatement("SELECT * FROM rental_property WHERE reference_id = ?");
+            verify(mockPreparedStatement).setInt(1, 1);
+            verify(mockPreparedStatement).executeQuery();
+            verify(mockConnection).close();
+            verify(mockPreparedStatement).close();
+
+            verifyNoMoreInteractions(mockConnection, mockPreparedStatement);
+        }
+    }
+
+    @Test
+    void shouldReturnEmptyWhenRentalPropertyNotFoundById() throws Exception {
+        try (MockedStatic<DriverManager> mockedDriverManager = mockStatic(DriverManager.class)) {
+            Connection mockConnection = mock(Connection.class);
+            PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
+            ResultSet mockResultSet = mock(ResultSet.class);
+
+            mockedDriverManager.when(() -> DriverManager.getConnection(any(), any(), any()))
+                    .thenReturn(mockConnection);
+            when(mockConnection.prepareStatement("SELECT * FROM rental_property WHERE reference_id = ?"))
+                    .thenReturn(mockPreparedStatement);
+            when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
+
+            when(mockResultSet.next()).thenReturn(false);
+
+            Optional<RentalProperty> rentalProperty = rentalPropertyDatabaseService.getRentalPropertyById(1);
+
+            assertThat(rentalProperty).isEmpty();
+
+            verify(mockConnection).prepareStatement("SELECT * FROM rental_property WHERE reference_id = ?");
+            verify(mockPreparedStatement).setInt(1, 1);
+            verify(mockPreparedStatement).executeQuery();
+            verify(mockConnection).close();
+            verify(mockPreparedStatement).close();
+
+            verifyNoMoreInteractions(mockConnection, mockPreparedStatement);
         }
     }
 

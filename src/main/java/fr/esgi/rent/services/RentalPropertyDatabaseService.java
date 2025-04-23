@@ -43,9 +43,25 @@ public class RentalPropertyDatabaseService {
     }
 
     public Optional<RentalProperty> getRentalPropertyById(int id) {
-        //TODO: Exercice 2
+        String query = "SELECT * FROM rental_property WHERE reference_id = ?";
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
-        return Optional.empty();
+                preparedStatement.setInt(1, id);
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                if (resultSet.next()) {
+                    return Optional.of(mapResultSetToRentalProperty(resultSet));
+                }
+                return Optional.empty();
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("MySQL JDBC Driver not found", e);
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching rental property by ID from database", e);
+        }
     }
 
     public void addRentalProperty(RentalProperty rentalProperty) {
