@@ -65,34 +65,38 @@ public class RentalPropertyDatabaseService {
     }
 
     public void addRentalProperty(RentalProperty rentalProperty) {
-        String query = "INSERT INTO rental_properties (reference_id, description, town, address, property_type, rent_amount, " +
+        String query = "INSERT INTO rental_property (reference_id, description, town, address, property_type, rent_amount, " +
                        "security_deposit_amount, area, bedrooms_count, floor_number, number_of_floors, construction_year, " +
                        "energy_classification, has_elevator, has_intercom, has_balcony, has_parking_space) " +
                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
-            preparedStatement.setInt(1, rentalProperty.referenceId());
-            preparedStatement.setString(2, rentalProperty.description());
-            preparedStatement.setString(3, rentalProperty.town());
-            preparedStatement.setString(4, rentalProperty.address());
-            preparedStatement.setString(5, rentalProperty.propertyType() != null ? rentalProperty.propertyType().getDesignation() : null);
-            preparedStatement.setDouble(6, rentalProperty.rentAmount());
-            preparedStatement.setDouble(7, rentalProperty.securityDepositAmount());
-            preparedStatement.setDouble(8, rentalProperty.area());
-            preparedStatement.setInt(9, rentalProperty.bedroomsCount());
-            preparedStatement.setInt(10, rentalProperty.floorNumber());
-            preparedStatement.setInt(11, rentalProperty.numberOfFloors());
-            preparedStatement.setInt(12, rentalProperty.constructionYear());
-            preparedStatement.setString(13, rentalProperty.energyClassification() != null ? rentalProperty.energyClassification().name() : null);
-            preparedStatement.setBoolean(14, rentalProperty.hasElevator());
-            preparedStatement.setBoolean(15, rentalProperty.hasIntercom());
-            preparedStatement.setBoolean(16, rentalProperty.hasBalcony());
-            preparedStatement.setBoolean(17, rentalProperty.hasParkingSpace());
+                preparedStatement.setInt(1, rentalProperty.referenceId());
+                preparedStatement.setString(2, rentalProperty.description());
+                preparedStatement.setString(3, rentalProperty.town());
+                preparedStatement.setString(4, rentalProperty.address());
+                preparedStatement.setString(5, rentalProperty.propertyType() != null ? rentalProperty.propertyType().getDesignation() : null);
+                preparedStatement.setDouble(6, rentalProperty.rentAmount());
+                preparedStatement.setDouble(7, rentalProperty.securityDepositAmount());
+                preparedStatement.setDouble(8, rentalProperty.area());
+                preparedStatement.setInt(9, rentalProperty.bedroomsCount());
+                preparedStatement.setInt(10, rentalProperty.floorNumber());
+                preparedStatement.setInt(11, rentalProperty.numberOfFloors());
+                preparedStatement.setInt(12, rentalProperty.constructionYear());
+                preparedStatement.setString(13, rentalProperty.energyClassification() != null ? rentalProperty.energyClassification().name() : null);
+                preparedStatement.setBoolean(14, rentalProperty.hasElevator());
+                preparedStatement.setBoolean(15, rentalProperty.hasIntercom());
+                preparedStatement.setBoolean(16, rentalProperty.hasBalcony());
+                preparedStatement.setBoolean(17, rentalProperty.hasParkingSpace());
 
-            preparedStatement.executeUpdate();
-
+                preparedStatement.executeUpdate();
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("MySQL JDBC Driver not found", e);
         } catch (SQLException e) {
             throw new RuntimeException("Error adding rental property to database", e);
         }

@@ -186,12 +186,12 @@ class RentalPropertyDatabaseServiceTest {
             Connection mockConnection = mock(Connection.class);
             PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
 
-            mockedDriverManager.when(() -> DriverManager.getConnection(anyString(), anyString(), anyString()))
+            mockedDriverManager.when(() -> DriverManager.getConnection(any(), any(), any()))
                     .thenReturn(mockConnection);
-            when(mockConnection.prepareStatement("INSERT INTO rental_properties (reference_id, description, town, address, property_type, rent_amount, " +
-                                                 "security_deposit_amount, area, bedrooms_count, floor_number, number_of_floors, construction_year, " +
-                                                 "energy_classification, has_elevator, has_intercom, has_balcony, has_parking_space) " +
-                                                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"))
+            when(mockConnection.prepareStatement("INSERT INTO rental_property (reference_id, description, town, address, property_type, rent_amount, " +
+                    "security_deposit_amount, area, bedrooms_count, floor_number, number_of_floors, construction_year, " +
+                    "energy_classification, has_elevator, has_intercom, has_balcony, has_parking_space) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"))
                     .thenReturn(mockPreparedStatement);
 
             RentalProperty rentalProperty = new RentalProperty(
@@ -220,7 +220,10 @@ class RentalPropertyDatabaseServiceTest {
             verify(mockPreparedStatement).setBoolean(17, rentalProperty.hasParkingSpace());
 
             verify(mockPreparedStatement).executeUpdate();
-            //verifyNoMoreInteractions(mockPreparedStatement);
+
+            verify(mockPreparedStatement).close();
+
+            verifyNoMoreInteractions(mockPreparedStatement);
         }
     }
 }
